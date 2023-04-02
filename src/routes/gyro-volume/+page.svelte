@@ -38,8 +38,11 @@
             return
         }
 
-        let gyroscope = new Gyroscope({frequency: 120});
-
+        try {
+            let gyroscope = new Gyroscope({frequency: 120});
+        } catch (e) {
+            dbg = ('Gyroscope is not allowed :( Error: ' + e)
+        }
         let cum = 0
 
 
