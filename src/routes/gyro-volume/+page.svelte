@@ -38,8 +38,9 @@
             return
         }
 
+        let gyroscope
         try {
-            let gyroscope = new Gyroscope({frequency: 120});
+            gyroscope = new Gyroscope({frequency: 120});
         } catch (e) {
             dbg = ('Gyroscope is not allowed :( Error: ' + e)
         }
