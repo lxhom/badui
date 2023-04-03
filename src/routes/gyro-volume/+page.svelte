@@ -27,44 +27,42 @@
 
     let calibrate = () => {}
 
-    onMount(async () => {
-        if (!(await Promise.all([
-            navigator.permissions.query(<PermissionDescriptor>{name: "gyroscope"}),
-        ])).every(({state}) => state === "granted")) {
-            return alert("Permission to use sensor was denied.");
-        }
-        if (typeof window.Gyroscope === 'undefined') {
-            dbg = ('Gyroscope is not supported')
-            return
-        }
-
-        let gyroscope
-        try {
-            gyroscope = new Gyroscope({frequency: 120});
-        } catch (e) {
-            dbg = ('Gyroscope is not allowed :( Error: ' + e)
-        }
-        let cum = 0
-
-
-        gyroscope.addEventListener("reading", (e) => {
-            dbg = 'xyz'.split('').map((c, i) => `${c}: ${gyroscope[c].toFixed(2)}`).join(' ')
-            cum -= (gyroscope.z * 0.005)
-            volume1 = Math.max(Math.min(volume1 + cum, 1), 0)
-        });
-
-        calibrate = () => {
-            cum = 0
-            volume1 = 0.5
-        }
-
-        gyroscope.start();
-
-        setTimeout(() => {
-            if (!gyroscope.x) {
-                dbg = 'Uh oh. No gyroscope data :('
+    onMount(async () => {try {
+            if (!(await Promise.all([
+                navigator.permissions.query(<PermissionDescriptor>{name: "gyroscope"}),
+            ])).every(({state}) => state === "granted")) {
+                return dbg = "Permission to use sensor was denied.";
             }
-        })
+            if (typeof window.Gyroscope === 'undefined') {
+                dbg = ('Gyroscope is not supported')
+                return
+            }
+
+            let gyroscope = new Gyroscope({frequency: 120});
+
+            let cum = 0
+
+            gyroscope.addEventListener("reading", (e) => {
+                dbg = 'xyz'.split('').map((c, i) => `${c}: ${gyroscope[c].toFixed(2)}`).join(' ')
+                cum -= (gyroscope.z * 0.005)
+                volume1 = Math.max(Math.min(volume1 + cum, 1), 0)
+            });
+
+            calibrate = () => {
+                cum = 0
+                volume1 = 0.5
+            }
+
+            gyroscope.start();
+
+            setTimeout(() => {
+                if (!gyroscope.x) {
+                    dbg = 'Uh oh. No gyroscope data :('
+                }
+            })
+        } catch (e) {
+            dbg = 'Gyroscope is not allowed :( Error: ' + e
+        }
     })
 </script>
 
