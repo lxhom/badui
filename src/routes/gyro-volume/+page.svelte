@@ -66,7 +66,7 @@
                     'Hate to be that guy but you need a Chromium-based browser for this'
             }
             if (e.toString().includes('undefined is not an object') || e.toString().includes('NotSupportedError')) {
-                return dbg = 'Gyroscope is not supported on iOS :( ' +
+                return dbg = 'Gyroscope is not supported on your device :( ' +
                     'Hate to be that guy but you need another device to use this'
             }
             dbg = 'Gyroscope is not allowed :( Error: ' + e
