@@ -28,45 +28,48 @@
     let calibrate = () => {}
 
     onMount(async () => {try {
-            if (!(await Promise.all([
-                navigator.permissions.query(<PermissionDescriptor>{name: "gyroscope"}),
-            ])).every(({state}) => state === "granted")) {
-                return dbg = "Permission to use sensor was denied.";
+        if (!(await Promise.all([
+            navigator.permissions.query(<PermissionDescriptor>{name: "gyroscope"}),
+        ])).every(({state}) => state === "granted")) {
+            return dbg = "Permission to use sensor was denied.";
+        }
+        if (typeof window.Gyroscope === 'undefined') {
+            dbg = ('Gyroscope is not supported')
+            return
+        }
+
+        let gyroscope = new Gyroscope({frequency: 120});
+
+        let cum = 0
+
+        gyroscope.addEventListener("reading", (e) => {
+            dbg = 'xyz'.split('').map((c, i) => `${c}: ${gyroscope[c].toFixed(2)}`).join(' ')
+            cum -= (gyroscope.z * 0.005)
+            volume1 = Math.max(Math.min(volume1 + cum, 1), 0)
+        });
+
+        calibrate = () => {
+            cum = 0
+            volume1 = 0.5
+        }
+
+        gyroscope.start();
+
+        setTimeout(() => {
+            if (!gyroscope.x) {
+                dbg = 'Uh oh. No gyroscope data :('
             }
-            if (typeof window.Gyroscope === 'undefined') {
-                dbg = ('Gyroscope is not supported')
-                return
-            }
-
-            let gyroscope = new Gyroscope({frequency: 120});
-
-            let cum = 0
-
-            gyroscope.addEventListener("reading", (e) => {
-                dbg = 'xyz'.split('').map((c, i) => `${c}: ${gyroscope[c].toFixed(2)}`).join(' ')
-                cum -= (gyroscope.z * 0.005)
-                volume1 = Math.max(Math.min(volume1 + cum, 1), 0)
-            });
-
-            calibrate = () => {
-                cum = 0
-                volume1 = 0.5
-            }
-
-            gyroscope.start();
-
-            setTimeout(() => {
-                if (!gyroscope.x) {
-                    dbg = 'Uh oh. No gyroscope data :('
-                }
-            })
+        })
         } catch (e) {
+            if (e.toString().includes('not a valid value for enumeration')) {
+                return dbg = 'Gyroscope is not supported on Firefox :( Hate to be that guy but you need a Chromium-based browser for this'
+            }
             dbg = 'Gyroscope is not allowed :( Error: ' + e
         }
     })
 </script>
 
-<div class="h-full flex justify-center items-center flex-col">
+<div class="h-full flex justify-center items-center flex-col text-center">
     Volume: {volume100}%
     <progress id="file" max="100" value={volume100} class="progress progress-primary w-56 mb-2"></progress>
     <audio bind:volume={volume_scaled} bind:this={audio} loop>
